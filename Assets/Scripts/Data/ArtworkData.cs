@@ -7,20 +7,18 @@ namespace PixelArtist.Data
     public class ArtworkData
     {
         public string id;
-        public string name;
         public int size;          // 8, 16, or 32
         public string pixelsBase64;
         public long createdAt;    // Unix timestamp (seconds)
         public long modifiedAt;
 
         /// <summary>Creates a blank ArtworkData with a new GUID and current timestamps.</summary>
-        public static ArtworkData Create(string name, int size)
+        public static ArtworkData Create(int size)
         {
             long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             return new ArtworkData
             {
                 id = Guid.NewGuid().ToString(),
-                name = name,
                 size = size,
                 pixelsBase64 = EncodePixels(new Color32[size * size]),
                 createdAt = now,
@@ -66,7 +64,6 @@ namespace PixelArtist.Data
             return new ArtworkData
             {
                 id = Guid.NewGuid().ToString(),
-                name = name + " copy",
                 size = size,
                 pixelsBase64 = pixelsBase64,
                 createdAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),

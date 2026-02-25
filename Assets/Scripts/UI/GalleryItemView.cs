@@ -1,18 +1,17 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using PixelArtist.Data;
 
 namespace PixelArtist.UI
 {
     /// <summary>
     /// One cell in the gallery grid. Renders the artwork thumbnail and shows
-    /// the name + a checkmark overlay when in select mode.
+    /// a checkmark overlay when in select mode. No name label — gallery is
+    /// purely visual thumbnails.
     /// </summary>
     public class GalleryItemView : MonoBehaviour
     {
         [SerializeField] RawImage thumbnail;
-        [SerializeField] TMP_Text nameLabel;
         [SerializeField] GameObject selectedOverlay; // checkmark GameObject
         [SerializeField] Button tapButton;
 
@@ -23,7 +22,6 @@ namespace PixelArtist.UI
         {
             ArtworkId = artwork.id;
             _onTap = onTap;
-            nameLabel.text = artwork.name;
             selectedOverlay.SetActive(false);
             tapButton.onClick.RemoveAllListeners();
             tapButton.onClick.AddListener(() => _onTap?.Invoke(this));

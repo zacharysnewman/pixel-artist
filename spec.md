@@ -86,19 +86,28 @@ picker, and a gallery for managing saved artworks.
 
 ## Color Picker
 
-Two-tab panel accessible from the canvas editor:
+Full-screen panel (anchored 0,0 → 1,1, offsets zero) that overlays the canvas editor.
+
+**Dismissal rules:**
+- **X button** (top corner) — close without changing anything
+- **Done button** (Picker tab) — confirm current HSB/Hex selection and dismiss
+- **Swatch tap** (Palettes tab) — immediately select that color and dismiss
+- **HEX submit** — entering a valid hex and pressing Return selects that color and dismisses
+
+The active color updates live while dragging the HSB square or hue slider so the
+color chip in the toolbar always reflects the current state.
 
 ### Tab 1: Picker
 - **HSB square selector** — 2D square where the horizontal axis is saturation (0–100%)
   and the vertical axis is brightness (0–100%); hue selected separately
-- **Hue slider** — horizontal slider (or ring) to select hue (0–360°)
-- **HEX input** — text field to enter/copy a 6-digit hex color (e.g. `#FF8800`);
-  updates the square and slider when submitted
+- **Hue slider** — horizontal slider to select hue (0–360°)
+- **HEX input** — 6-digit hex field; submitting a valid value selects the color and closes
+- **Done button** — confirms the current selection and dismisses the panel
 
 ### Tab 2: Palettes
 - Grid of named palettes, each previewed as a row of color swatches
 - Tap a palette to expand it and show all its swatches
-- Tap a swatch to set it as the active color and close the picker
+- Tap a swatch to set it as the active color and immediately dismiss the panel
 - Built-in palettes shipped with the app (see below)
 
 ### Built-in Palettes
@@ -115,7 +124,8 @@ Two-tab panel accessible from the canvas editor:
 
 ## Gallery
 
-The home screen showing all saved artworks as thumbnails.
+The home screen. Artworks have no user-visible names — the gallery is purely
+a tiled grid of thumbnails. Artworks are identified only by their thumbnail.
 
 ### Sort Controls
 - **Sort-by button** — toggles between "Created" and "Modified" date
@@ -124,7 +134,7 @@ The home screen showing all saved artworks as thumbnails.
 - Sorting is presentation-only; GalleryManager stores artworks in insertion order
 
 ### Normal Mode
-- Thumbnails displayed in a grid, ordered by the active sort setting
+- Tiled grid of thumbnails, ordered by the active sort setting; no name labels
 - Single tap on a thumbnail → opens the canvas editor for that artwork
 - **"Select"** button (top-right) → enters Select Mode
 

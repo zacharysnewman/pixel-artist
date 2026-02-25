@@ -240,7 +240,7 @@ namespace PixelArtist.UI
         void CreateNewArtwork(int size)
         {
             newCanvasPicker.SetActive(false);
-            ArtworkData newArtwork = ArtworkData.Create("Untitled", size);
+            ArtworkData newArtwork = ArtworkData.Create(size);
             OnOpenArtwork?.Invoke(newArtwork);
         }
     }

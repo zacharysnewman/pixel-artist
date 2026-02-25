@@ -5,13 +5,19 @@ using TMPro;
 namespace PixelArtist.UI
 {
     /// <summary>
-    /// Two-tab color picker panel.
+    /// Full-screen two-tab color picker panel.
+    ///
+    /// Scene setup: RectTransform anchor min=(0,0) max=(1,1), offsets=0 so the
+    /// panel fills the screen and sits above all canvas content in the hierarchy.
     ///
     /// Tab 0 — Picker:
-    ///   HSB square (saturation × brightness) + hue slider + HEX input field
+    ///   HSB square (saturation × brightness) + hue slider + HEX input field.
+    ///   Live-updates the active color while dragging; the "Done" button (or the
+    ///   X close button) commits and dismisses the panel.
     ///
     /// Tab 1 — Palettes:
-    ///   PaletteGallery component handles rendering and swatch taps
+    ///   PaletteGallery swatches; tapping a swatch immediately selects that color
+    ///   and dismisses the panel.
     ///
     /// Raises OnColorChanged whenever the active color changes.
     /// </summary>
@@ -39,8 +45,9 @@ namespace PixelArtist.UI
         [Header("Preview")]
         [SerializeField] Image previewImage;
 
-        [Header("Close")]
-        [SerializeField] Button closeButton;
+        [Header("Close / Done")]
+        [SerializeField] Button closeButton;  // X button — dismisses without changing the apply state
+        [SerializeField] Button doneButton;   // "Done" on the Picker tab — confirms selection and dismisses
 
         [Header("Palette Gallery")]
         [SerializeField] PaletteGallery paletteGallery;
@@ -75,6 +82,7 @@ namespace PixelArtist.UI
             pickerTabButton.onClick.AddListener(() => ShowTab(0));
             palettesTabButton.onClick.AddListener(() => ShowTab(1));
             closeButton.onClick.AddListener(() => gameObject.SetActive(false));
+            if (doneButton != null) doneButton.onClick.AddListener(() => gameObject.SetActive(false));
             hueSlider.onValueChanged.AddListener(OnHueSliderChanged);
             hexInput.onEndEdit.AddListener(OnHexSubmitted);
 
@@ -207,6 +215,7 @@ namespace PixelArtist.UI
                 byte b = System.Convert.ToByte(text.Substring(4, 2), 16);
                 SetColor(new Color32(r, g, b, 255));
                 RaiseColorChanged();
+                gameObject.SetActive(false); // committing a hex value counts as selecting a color
             }
             catch { UpdateHexField(); }
         }
