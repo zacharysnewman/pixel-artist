@@ -47,6 +47,26 @@ picker, and a gallery for managing saved artworks.
 
 ---
 
+## Canvas Display
+
+### Transparency Background
+- Checkerboard pattern rendered behind the canvas (one checker square per canvas pixel)
+- Colors: `#CCCCCC` (light) alternating with `#999999` (dark)
+- Implemented as a separate RawImage behind the canvas RawImage; transparent canvas pixels
+  let the checkerboard show through via normal alpha blending
+
+### Pixel Grid
+- Semi-transparent dark grid lines between every canvas pixel
+- On by default; user can toggle off via a grid button in the toolbar
+- **Density scaling**: grid interval is the smallest power-of-2 (in canvas pixels) such that
+  the resulting gap between lines is ≥ 4 screen pixels — prevents rendering imperceptibly
+  fine lines at low zoom
+  - e.g. at 1× zoom on a 32×32 canvas shown at 300px: ~9px/pixel → interval = 1 (every pixel)
+  - e.g. at 0.5× zoom same setup: ~4.7px/pixel → interval = 1; at even smaller zoom → interval = 2, 4, …
+- Implemented as a tiled RawImage overlay using a 2×2 repeating grid-cell texture + uvRect
+
+---
+
 ## Undo / Redo
 
 - Full-snapshot undo (acceptable at max 32×32 = 4KB per snapshot)
@@ -97,8 +117,14 @@ Two-tab panel accessible from the canvas editor:
 
 The home screen showing all saved artworks as thumbnails.
 
+### Sort Controls
+- **Sort-by button** — toggles between "Created" and "Modified" date
+- **Direction button** — toggles "↓ Newest" (descending) and "↑ Oldest" (ascending)
+- Default: sort by Created, descending (newest artwork at top-left)
+- Sorting is presentation-only; GalleryManager stores artworks in insertion order
+
 ### Normal Mode
-- Thumbnails displayed in a grid
+- Thumbnails displayed in a grid, ordered by the active sort setting
 - Single tap on a thumbnail → opens the canvas editor for that artwork
 - **"Select"** button (top-right) → enters Select Mode
 

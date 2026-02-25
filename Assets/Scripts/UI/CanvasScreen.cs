@@ -22,6 +22,10 @@ namespace PixelArtist.UI
     {
         [Header("Core")]
         [SerializeField] CanvasRenderer canvasRenderer;
+        [SerializeField] CheckerboardBackground checkerboard;
+        [SerializeField] GridOverlay gridOverlay;
+        [SerializeField] RectTransform canvasRect;        // the RawImage RectTransform
+        [SerializeField] RectTransform canvasParentRect;  // the scaled/panned container
         [SerializeField] TouchInputHandler touchInput;
 
         [Header("Toolbar — Tools")]
@@ -37,6 +41,9 @@ namespace PixelArtist.UI
         [Header("Toolbar — Draw / Pan Mode")]
         [SerializeField] Button drawModeButton;
         [SerializeField] Button panModeButton;
+
+        [Header("Toolbar — Grid")]
+        [SerializeField] Button gridToggleButton;
 
         [Header("Toolbar — Color & Navigation")]
         [SerializeField] Button colorChipButton;   // tapping opens the color picker panel
@@ -98,6 +105,7 @@ namespace PixelArtist.UI
             backButton.onClick.AddListener(OnBackPressed);
             saveButton.onClick.AddListener(OnSaveDialog);
             discardButton.onClick.AddListener(OnDiscardDialog);
+            if (gridToggleButton != null) gridToggleButton.onClick.AddListener(ToggleGrid);
 
             colorPickerPanel.OnColorChanged += OnColorPickerChanged;
         }
@@ -130,6 +138,8 @@ namespace PixelArtist.UI
 
             _undo = new UndoSystem();
             canvasRenderer.Init(_canvas);
+            checkerboard.Init(artwork.size);
+            gridOverlay.Init(artwork.size, canvasRect, canvasParentRect);
 
             touchInput.PixelCanvas = _canvas;
             touchInput.UndoSystem = _undo;
@@ -267,6 +277,12 @@ namespace PixelArtist.UI
             touchInput.PanMode = pan;
             drawModeButton.interactable = pan;   // dim if already in draw mode
             panModeButton.interactable  = !pan;  // dim if already in pan mode
+        }
+
+        void ToggleGrid()
+        {
+            gridOverlay.Visible = !gridOverlay.Visible;
+            // TODO: update gridToggleButton visual to reflect on/off state
         }
 
         // ── Helpers ────────────────────────────────────────────────────────────

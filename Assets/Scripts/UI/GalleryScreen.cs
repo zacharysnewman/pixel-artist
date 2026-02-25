@@ -11,7 +11,9 @@ namespace PixelArtist.UI
     /// Controls the gallery home screen.
     ///
     /// Normal Mode:
-    ///   - Grid of artwork thumbnails; single tap opens the canvas editor
+    ///   - Grid of artwork thumbnails sorted by the active sort setting
+    ///   - Sort-by button toggles Created / Modified date
+    ///   - Direction button toggles ascending / descending (default: newest first)
     ///   - "Select" button (top-right) enters Select Mode
     ///   - "+" button opens the new-canvas dimension picker
     ///
@@ -22,7 +24,13 @@ namespace PixelArtist.UI
     /// </summary>
     public class GalleryScreen : MonoBehaviour
     {
-        [Header("Toolbar")]
+        [Header("Toolbar — Sort")]
+        [SerializeField] Button sortByButton;        // toggles Created ↔ Modified
+        [SerializeField] TMP_Text sortByLabel;       // "Created" | "Modified"
+        [SerializeField] Button sortDirButton;       // toggles asc ↔ desc
+        [SerializeField] TMP_Text sortDirLabel;      // "↓ Newest" | "↑ Oldest"
+
+        [Header("Toolbar — Actions")]
         [SerializeField] Button newArtworkButton;
         [SerializeField] Button selectButton;
         [SerializeField] Button cancelSelectButton;
@@ -46,8 +54,16 @@ namespace PixelArtist.UI
         [SerializeField] Button deleteConfirmNoButton;
         [SerializeField] TMP_Text deleteConfirmText;
 
-        // Injected by AppController when navigating to the canvas editor
+        // Injected by AppController
         public System.Action<ArtworkData> OnOpenArtwork;
+
+        // ── Sort state ─────────────────────────────────────────────────────────
+
+        enum SortBy { CreatedAt, ModifiedAt }
+        SortBy _sortBy = SortBy.CreatedAt;
+        bool _sortAscending = false; // false = newest first (descending)
+
+        // ── Selection state ────────────────────────────────────────────────────
 
         bool _selectMode;
         readonly HashSet<string> _selectedIds = new HashSet<string>();
@@ -80,21 +96,60 @@ namespace PixelArtist.UI
             newCanvasCancelButton.onClick.AddListener(() => newCanvasPicker.SetActive(false));
             deleteConfirmYesButton.onClick.AddListener(ConfirmDelete);
             deleteConfirmNoButton.onClick.AddListener(() => deleteConfirmDialog.SetActive(false));
+            sortByButton.onClick.AddListener(ToggleSortBy);
+            sortDirButton.onClick.AddListener(ToggleSortDirection);
 
             SetSelectMode(false);
+            RefreshSortLabels();
+        }
+
+        // ── Sort ───────────────────────────────────────────────────────────────
+
+        void ToggleSortBy()
+        {
+            _sortBy = _sortBy == SortBy.CreatedAt ? SortBy.ModifiedAt : SortBy.CreatedAt;
+            RefreshSortLabels();
+            Rebuild();
+        }
+
+        void ToggleSortDirection()
+        {
+            _sortAscending = !_sortAscending;
+            RefreshSortLabels();
+            Rebuild();
+        }
+
+        void RefreshSortLabels()
+        {
+            if (sortByLabel != null)
+                sortByLabel.text = _sortBy == SortBy.CreatedAt ? "Created" : "Modified";
+            if (sortDirLabel != null)
+                sortDirLabel.text = _sortAscending ? "↑ Oldest" : "↓ Newest";
+        }
+
+        List<ArtworkData> GetSortedArtworks()
+        {
+            var list = new List<ArtworkData>(GalleryManager.Instance.Artworks);
+            list.Sort((a, b) =>
+            {
+                long ta = _sortBy == SortBy.CreatedAt ? a.createdAt : a.modifiedAt;
+                long tb = _sortBy == SortBy.CreatedAt ? b.createdAt : b.modifiedAt;
+                int cmp = ta.CompareTo(tb);
+                return _sortAscending ? cmp : -cmp;
+            });
+            return list;
         }
 
         // ── Gallery Build ──────────────────────────────────────────────────────
 
         void Rebuild()
         {
-            // Destroy old views
             foreach (Transform child in gridContainer) Destroy(child.gameObject);
             _itemViews.Clear();
             _selectedIds.Clear();
             UpdateActionButtons();
 
-            foreach (ArtworkData artwork in GalleryManager.Instance.Artworks)
+            foreach (ArtworkData artwork in GetSortedArtworks())
             {
                 GameObject go = Instantiate(galleryItemPrefab, gridContainer);
                 var view = go.GetComponent<GalleryItemView>();
@@ -126,8 +181,8 @@ namespace PixelArtist.UI
 
         // ── Select Mode ────────────────────────────────────────────────────────
 
-        void EnterSelectMode()  => SetSelectMode(true);
-        void ExitSelectMode()   => SetSelectMode(false);
+        void EnterSelectMode() => SetSelectMode(true);
+        void ExitSelectMode()  => SetSelectMode(false);
 
         void SetSelectMode(bool active)
         {
@@ -185,9 +240,7 @@ namespace PixelArtist.UI
         void CreateNewArtwork(int size)
         {
             newCanvasPicker.SetActive(false);
-            // Create a transient (unsaved) ArtworkData; CanvasScreen saves it on back if needed.
-            ArtworkData newArtwork = ArtworkData.Create($"Untitled", size);
-            // Mark as unsaved so CanvasScreen knows to auto-save on back
+            ArtworkData newArtwork = ArtworkData.Create("Untitled", size);
             OnOpenArtwork?.Invoke(newArtwork);
         }
     }
