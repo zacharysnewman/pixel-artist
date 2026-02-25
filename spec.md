@@ -140,7 +140,7 @@ a tiled grid of thumbnails. Artworks are identified only by their thumbnail.
 
 ### Select Mode
 - Tap thumbnails to toggle selection (checkmark overlay)
-- **"Duplicate"** button — copies selected artwork(s), appending " copy" to the name
+- **"Duplicate"** button — copies selected artwork(s) as new artworks with a new GUID and current timestamps
 - **"Delete"** button — deletes selected artwork(s) after a confirmation prompt
 - **"Cancel"** button (replaces "Select") → exits Select Mode, clears selection
 
@@ -183,7 +183,6 @@ Triggered when the user taps the back / close button in the canvas editor:
 ```json
 {
   "id": "string (GUID)",
-  "name": "string",
   "size": 16,
   "pixelsBase64": "string",
   "createdAt": 1234567890,
